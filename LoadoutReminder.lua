@@ -1,10 +1,13 @@
 -- BAL Version
+-- TODO: Try to hook onto BALs update functions for the sets to recognize changes!
+-- TODO: Maybe also try to do this to recognize a "manual" set change
 
 if BetterAddonListDB == nil then
 	print("Could not find BetterAddonList Addon")
 	return
 end
 
+BALFrame = nil
 
 local addon = CreateFrame("Frame", "LoadoutReminderAddon")
 addon:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -20,8 +23,59 @@ addon.defaultDB = {
 	BG = nil,
 	ARENA = nil,
 	CURRENT_SET = nil,
-	ADV_MODE = false
+	ADV_MODE = false,
+	BAL_LOADED_SET = nil
 }
+
+-- CASE: if player manipulates addon sets via addon list gui of BAL
+BALDropdownHooked = false
+BetterAddonListSetsButton:HookScript("OnClick", function(self) 
+	if not BALDropdownHooked then
+		DropDownList2Button4:HookScript("OnClick", function(self) 
+			local setName = DropDownList2Button1NormalText:GetText()
+			-- print("clicked load button, addon set: " .. setName)
+			-- print("remember set because it was loaded in addon list BAL overview")
+			LoadoutReminderDB['BAL_LOADED_SET'] = setName
+		end)
+		DropDownList2Button12:HookScript("OnClick", function(self) 
+			local setName = DropDownList2Button1NormalText:GetText()
+			-- print("clicked enable button, addon set: " .. setName)
+			-- print("set current set because it was enabled in addon list BAL overview")
+			LoadoutReminderDB['BAL_LOADED_SET'] = setName
+		end)
+		DropDownList2Button5:HookScript("OnClick", function(self) 
+			local setName = DropDownList2Button1NormalText:GetText()
+			-- print("clicked save button, addon set: " .. setName)
+
+			_G['LibDialog-1.0_Button1']:HookScript("OnClick", function(self) 
+				-- print("clicked save on set: " .. setName)
+				-- well a saved set is also always the current set!
+				addon:setCurrentSet(setName)
+				-- if the reminder frame is currently visible, update it by calling check and Show again
+				if LoadoutReminderFrame:IsVisible() then
+					addon:checkAndShow()
+				end
+			end)
+		end)
+		BALDropdownHooked = true
+	end
+end)
+
+-- CASE: TODO: If player manipulates addon sets via macro usage of better addon list
+--
+
+-- If I ever need this..
+--function addon:findBALFrame()
+	--local f = EnumerateFrames()
+	
+	--while f do
+	--	if f['RenameSet'] and f['DeleteSet'] and f['SaveSet'] and f['DisableSet'] and f['EnableSet'] and f['LoadSet'] and f['EnableProtected'] then
+	--		BALFrame = f
+	--		return
+	--	end
+	--	f = EnumerateFrames(f)
+	--end
+--end
 
 function addon:getAddonSets()
 	return BetterAddonListDB.sets
@@ -31,6 +85,7 @@ function addon:ADDON_LOADED(addon_name)
 	if addon_name ~= 'BetterAddonList_LoadoutReminder' then
 		return
 	end
+	addon:findBALFrame()
 	addon:loadDefaultDB()
 	addon:initOptions()
 	addon:initLoadoutReminderFrame()
@@ -151,12 +206,21 @@ end
 function addon:PLAYER_ENTERING_WORLD(isLogIn, isReload)
 	-- if player just logged in, dont suggest addon set loading
 	if isLogIn then
+		-- purge it on login if player changed set and logged out (for whatever reason)
+		LoadoutReminderDB['BAL_LOADED_SET'] = nil
 		return
 	elseif isReload then
-		return
+		-- check if player changed set via BAL gui
+		if LoadoutReminderDB['BAL_LOADED_SET'] ~= nil then
+			-- print("Set was changed with bal to: " .. LoadoutReminderDB['BAL_LOADED_SET'])
+			addon:setCurrentSet(LoadoutReminderDB['BAL_LOADED_SET'])
+			LoadoutReminderDB['BAL_LOADED_SET'] = nil
+		end
+	else
+		-- just purge it because BAL does it too
+		LoadoutReminderDB['BAL_LOADED_SET'] = nil
 	end
 
-	-- here I can be sure that it will only be called when not logging in or reloading manually
 	self:checkAndShow()
 end
 
@@ -293,6 +357,13 @@ function addon:initializeDropdownValues(dropDown, linkedSetID)
 				--print("clicked: " .. linkedSetID .. " -> " .. tostring(arg1))
 				LoadoutReminderDB[linkedSetID] = arg1
 				UIDropDownMenu_SetText(dropDown, arg1)
+				-- a new set was chosen for a new environment
+				-- check if it is not already loaded anyway, then close frame if open
+				if not addon:isSetLoaded(arg1) then
+					addon:checkAndShow()
+				else
+					LoadoutReminderFrame:Hide()
+				end
 			end
 
 			info.text = setName
