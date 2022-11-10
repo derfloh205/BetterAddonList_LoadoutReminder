@@ -85,7 +85,6 @@ function addon:ADDON_LOADED(addon_name)
 	if addon_name ~= 'BetterAddonList_LoadoutReminder' then
 		return
 	end
-	addon:findBALFrame()
 	addon:loadDefaultDB()
 	addon:initOptions()
 	addon:initLoadoutReminderFrame()
