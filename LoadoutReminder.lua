@@ -1,3 +1,4 @@
+-- BAL Version
 
 if BetterAddonListDB == nil then
 	print("Could not find BetterAddonList Addon")
@@ -21,6 +22,10 @@ addon.defaultDB = {
 	CURRENT_SET = nil,
 	ADV_MODE = false
 }
+
+function addon:getAddonSets()
+	return BetterAddonListDB.sets
+end
 
 function addon:ADDON_LOADED(addon_name)
 	if addon_name ~= 'BetterAddonList_LoadoutReminder' then
@@ -231,8 +236,19 @@ function addon:initLoadoutReminderFrame()
 	bDisable:SetText("Disable Addonset")
 end
 
+function addon:updateOptionDropdowns()
+	UIDropDownMenu_Initialize(DropdownDUNGEON, initializeDropdownValues) 
+	UIDropDownMenu_Initialize(DropdownRAID, initializeDropdownValues) 
+	UIDropDownMenu_Initialize(DropdownARENA, initializeDropdownValues) 
+	UIDropDownMenu_Initialize(DropdownBG, initializeDropdownValues) 
+	UIDropDownMenu_Initialize(DropdownOPENWORLD, initializeDropdownValues) 
+end
+
 function addon:initOptions()
 	self.optionsPanel = CreateFrame("Frame")
+	self.optionsPanel:HookScript("OnShow", function(self)
+		addon:updateOptionDropdowns()
+end)
 	self.optionsPanel.name = "BetterAddonList_LoadoutReminder"
 	local title = self.optionsPanel:CreateFontString('optionsTitle', 'OVERLAY', 'GameFontNormal')
     title:SetPoint("TOP", 0, 0)
@@ -265,21 +281,13 @@ function addon:initOptions()
 	InterfaceOptions_AddCategory(self.optionsPanel)
 end
 
-function addon:initDropdownMenu(linkedSetID, label, offsetX, offsetY)
-	local dropDown = CreateFrame("Frame", "Dropdown" .. linkedSetID, self.optionsPanel, "UIDropDownMenuTemplate")
-	dropDown:SetPoint("TOP", self.optionsPanel, offsetX, offsetY)
-	UIDropDownMenu_SetWidth(dropDown, 200) -- Use in place of dropDown:SetWidth
-	-- Bind an initializer function to the dropdown; see previous sections for initializer function examples.
-	if LoadoutReminderDB[linkedSetID] ~= nil then
-		UIDropDownMenu_SetText(dropDown, LoadoutReminderDB[linkedSetID])
-	else
-		UIDropDownMenu_SetText(dropDown, "Choose an addon set")
-	end
-	
-	UIDropDownMenu_Initialize(dropDown, function(self, level, menulist) 
-		-- loop through possible sets created with BetterAddonList and put them as option
-		for k, v in pairs(BetterAddonListDB.sets) do
-			setName = k
+function addon:initializeDropdownValues(dropDown, linkedSetID)
+	local setList = addon:getAddonSets()
+
+	UIDropDownMenu_Initialize(dropDown, function(self) 
+		-- loop through possible sets and put them as option
+		for k, v in pairs(setList) do
+			setName = k -- in BAL K is needed
 			local info = UIDropDownMenu_CreateInfo()
 			info.func = function(self, arg1, arg2, checked) 
 				--print("clicked: " .. linkedSetID .. " -> " .. tostring(arg1))
@@ -292,6 +300,20 @@ function addon:initDropdownMenu(linkedSetID, label, offsetX, offsetY)
 			UIDropDownMenu_AddButton(info)
 		end
 	end)
+end
+
+function addon:initDropdownMenu(linkedSetID, label, offsetX, offsetY)
+	local dropDown = CreateFrame("Frame", "Dropdown" .. linkedSetID, self.optionsPanel, "UIDropDownMenuTemplate")
+	dropDown:SetPoint("TOP", self.optionsPanel, offsetX, offsetY)
+	UIDropDownMenu_SetWidth(dropDown, 200) -- Use in place of dropDown:SetWidth
+	-- Bind an initializer function to the dropdown; see previous sections for initializer function examples.
+	if LoadoutReminderDB[linkedSetID] ~= nil then
+		UIDropDownMenu_SetText(dropDown, LoadoutReminderDB[linkedSetID])
+	else
+		UIDropDownMenu_SetText(dropDown, "Choose an addon set")
+	end
+	
+	addon:initializeDropdownValues(dropDown, linkedSetID)
 
 	local dd_title = dropDown:CreateFontString('dd_title', 'OVERLAY', 'GameFontNormal')
     dd_title:SetPoint("TOP", 0, 10)

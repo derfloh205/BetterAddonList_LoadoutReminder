@@ -1,4 +1,4 @@
-## Interface: 90001
+## Interface: 100000
 ## DefaultState: enabled
 
 ## Title: BetterAddonList_LoadoutReminder
@@ -6,7 +6,7 @@
 ## Author: genju
 ## RequiredDeps: BetterAddonList
 ## SavedVariables: LoadoutReminderDB
-## Version: 0.1
+## Version: 1.1
 
 LoadoutReminder.lua
 LoadoutReminder.xml
