@@ -8,11 +8,12 @@
 ## X-Wago-ID: rN4VBMKD
 ## X-WoWI-ID: 26649
 ## RequiredDeps: BetterAddonList
-## SavedVariables: LoadoutReminderDB
+## SavedVariables: BALLoadoutReminderOptions, BALLoadoutReminderDB, BALLoadoutReminderGGUIConfig
 ## Version: 2.0.0
 
 embeds.xml
 Libs/Libs.lua
-
+Util/Const.lua
 Main/LoadoutReminder.lua
-LoadoutReminder.xml
+
+Modules/ReminderFrame/Frames.lua
