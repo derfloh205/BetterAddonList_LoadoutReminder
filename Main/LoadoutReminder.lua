@@ -18,22 +18,23 @@ BALLoadoutReminderDB = BALLoadoutReminderDB or {
 	BAL_LOADED_SET = nil
 }
 
+
 function BALLoadoutReminder.MAIN:ADDON_LOADED(addon_name)
 	if addon_name ~= AddonName then
+		return
+	end
+	if BetterAddonListDB == nil then
+		print("BAL not loaded yet")
 		return
 	end
 	print("LoadoutReminder Loaded")
 	BALLoadoutReminder.GGUI:SetConfigSavedVariable("BALLoadoutReminderGGUIConfig")
 
+	BALLoadoutReminder.OPTIONS:Init()
 	BALLoadoutReminder.REMINDER_FRAME.FRAMES:Init()	
 	-- show on start -> debug
 
-	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
-	--reminderFrame:Show()
-
 	BALLoadoutReminder.MAIN:InitBALHook()
-	--BALLoadoutReminder.MAIN:initOptions()
-	--BALLoadoutReminder.MAIN:initLoadoutReminderFrame()
 end
 
 BALDropdownHooked = false
@@ -71,7 +72,7 @@ end
 
 
 function BALLoadoutReminder.MAIN:GetAddonSets()
-	return BALLoadoutReminderDB.sets
+	return BetterAddonListDB.sets
 end
 
 function BALLoadoutReminder.MAIN:SetCurrentSet(loaded_set)
@@ -226,7 +227,7 @@ function BALLoadoutReminder.MAIN:PLAYER_LOGIN()
 		rest = (rest and rest ~= "") and rest:trim() or nil
 
 		if command == "config" then
-			--InterfaceOptionsFrame_OpenToCategory(addon.optionsPanel)
+			InterfaceOptionsFrame_OpenToCategory(BALLoadoutReminder.OPTIONS.optionsPanel)
 		end
 
 		if command == "check" then 

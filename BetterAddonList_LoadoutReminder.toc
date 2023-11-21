@@ -16,4 +16,5 @@ Libs/Libs.lua
 Util/Const.lua
 Main/LoadoutReminder.lua
 
+Modules/Options/Options.lua
 Modules/ReminderFrame/Frames.lua
