@@ -14,5 +14,5 @@
 embeds.xml
 Libs/Libs.lua
 
-LoadoutReminder.lua
+Main/LoadoutReminder.lua
 LoadoutReminder.xml

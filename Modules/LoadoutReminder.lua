@@ -1,6 +1,5 @@
--- BAL Version
--- TODO: Try to hook onto BALs update functions for the sets to recognize changes!
--- TODO: Maybe also try to do this to recognize a "manual" set change
+AddonName, BALLoadoutReminder = ...
+
 
 if BetterAddonListDB == nil then
 	print("Could not find BetterAddonList Addon")
