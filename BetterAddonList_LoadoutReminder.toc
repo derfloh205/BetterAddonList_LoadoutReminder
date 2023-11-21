@@ -4,9 +4,12 @@
 ## Title: BetterAddonList_LoadoutReminder
 ## Notes: Reminds you to switch addon loadouts created by the BetterAddonList addon in specific situations
 ## Author: genju
+## X-Curse-Project-ID: 699541
+## X-Wago-ID: rN4VBMKD
+## X-WoWI-ID: 26649
 ## RequiredDeps: BetterAddonList
 ## SavedVariables: LoadoutReminderDB
-## Version: 1.1
+## Version: 2.0.0
 
 embeds.xml
 Libs/Libs.lua
