@@ -190,24 +190,24 @@ end
 
 function BALLoadoutReminder.MAIN:PLAYER_ENTERING_WORLD(isLogIn, isReload)
 	
-	-- -- if player just logged in, dont suggest addon set loading
-	-- if isLogIn then
-	-- 	-- purge it on login if player changed set and logged out (for whatever reason)
-	-- 	LoadoutReminderDB['BAL_LOADED_SET'] = nil
-	-- 	return
-	-- elseif isReload then
-	-- 	-- check if player changed set via BAL gui
-	-- 	if LoadoutReminderDB['BAL_LOADED_SET'] ~= nil then
-	-- 		-- print("Set was changed with bal to: " .. LoadoutReminderDB['BAL_LOADED_SET'])
-	-- 		BALLoadoutReminder.MAIN:setCurrentSet(LoadoutReminderDB['BAL_LOADED_SET'])
-	-- 		LoadoutReminderDB['BAL_LOADED_SET'] = nil
-	-- 	end
-	-- else
-	-- 	-- just purge it because BAL does it too
-	-- 	LoadoutReminderDB['BAL_LOADED_SET'] = nil
-	-- end
+	-- if player just logged in, dont suggest addon set loading
+	if isLogIn then
+		-- purge it on login if player changed set and logged out (for whatever reason)
+		BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
+		return
+	elseif isReload then
+		-- check if player changed set via BAL gui
+		if BALLoadoutReminderDB['BAL_LOADED_SET'] ~= nil then
+			-- print("Set was changed with bal to: " .. LoadoutReminderDB['BAL_LOADED_SET'])
+			BALLoadoutReminder.MAIN:SetCurrentSet(BALLoadoutReminderDB['BAL_LOADED_SET'])
+			BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
+		end
+	else
+		-- just purge it because BAL does it too
+		BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
+	end
 
-	-- self:checkAndShow()
+	BALLoadoutReminder.MAIN:CheckAndShow()
 end
 
 function BALLoadoutReminder.MAIN:LoadDefaultDB() 
@@ -284,95 +284,4 @@ function BALLoadoutReminder.MAIN:InitLoadoutReminderFrame()
 	-- bDisable:SetAttribute("type1", "macro")
 	-- bDisable:SetAttribute("macrotext", "")
 	-- bDisable:SetText("Disable Addonset")
-end
-
-function BALLoadoutReminder.MAIN:UpdateOptionDropdowns()
-	-- UIDropDownMenu_Initialize(DropdownDUNGEON, initializeDropdownValues) 
-	-- UIDropDownMenu_Initialize(DropdownRAID, initializeDropdownValues) 
-	-- UIDropDownMenu_Initialize(DropdownARENA, initializeDropdownValues) 
-	-- UIDropDownMenu_Initialize(DropdownBG, initializeDropdownValues) 
-	-- UIDropDownMenu_Initialize(DropdownOPENWORLD, initializeDropdownValues) 
-end
-
-function BALLoadoutReminder.MAIN:InitOptions()
--- 	self.optionsPanel = CreateFrame("Frame")
--- 	self.optionsPanel:HookScript("OnShow", function(self)
--- 		BALLoadoutReminder.MAIN:UpdateOptionDropdowns()
--- end)
--- 	self.optionsPanel.name = "BetterAddonList_LoadoutReminder"
--- 	local title = self.optionsPanel:CreateFontString('optionsTitle', 'OVERLAY', 'GameFontNormal')
---     title:SetPoint("TOP", 0, 0)
--- 	title:SetText("BetterAddonList_LoadoutReminder")
-
--- 	self:initDropdownMenu("DUNGEON", "Dungeon", -115, -50)
--- 	self:initDropdownMenu("RAID", "Raid", 115, -50)
-
--- 	self:initDropdownMenu("ARENA", "Arena", -115, -100)
--- 	self:initDropdownMenu("BG", "Battlegrounds", 115, -100)
-
--- 	self:initDropdownMenu("OPENWORLD", "Open World", -115, -150)
-
--- 	local checkButton = CreateFrame("CheckButton", nil, self.optionsPanel, "InterfaceOptionsCheckButtonTemplate")
--- 	checkButton:SetPoint("TOP", self.optionsPanel, 20, -150)
--- 	checkButton.Text:SetText("Advanced Mode (Enabling/Disabling Addonsets)")
--- 	-- there already is an existing OnClick script that plays a sound, hook it
--- 	checkButton:HookScript("OnClick", function(_, btn, down)
--- 		local checked = checkButton:GetChecked()
--- 		LoadoutReminderDB['ADV_MODE'] = checked
--- 		if LoadoutReminderFrame:IsVisible() then
--- 			BALLoadoutReminder.MAIN:checkAndShow()
--- 		end
--- 	end)
--- 	if LoadoutReminderDB['ADV_MODE'] == nil then
--- 		LoadoutReminderDB['ADV_MODE'] = false
--- 	end
--- 	checkButton:SetChecked(LoadoutReminderDB['ADV_MODE']) -- set the initial checked state
-
--- 	InterfaceOptions_AddCategory(self.optionsPanel)
-end
-
-function BALLoadoutReminder.MAIN:InitializeDropdownValues(dropDown, linkedSetID)
-	-- local setList = BALLoadoutReminder.MAIN:getAddonSets()
-
-	-- UIDropDownMenu_Initialize(dropDown, function(self) 
-	-- 	-- loop through possible sets and put them as option
-	-- 	for k, v in pairs(setList) do
-	-- 		setName = k -- in BAL K is needed
-	-- 		local info = UIDropDownMenu_CreateInfo()
-	-- 		info.func = function(self, arg1, arg2, checked) 
-	-- 			--print("clicked: " .. linkedSetID .. " -> " .. tostring(arg1))
-	-- 			LoadoutReminderDB[linkedSetID] = arg1
-	-- 			UIDropDownMenu_SetText(dropDown, arg1)
-	-- 			-- a new set was chosen for a new environment
-	-- 			-- check if it is not already loaded anyway, then close frame if open
-	-- 			if not BALLoadoutReminder.MAIN:IsSetLoaded(arg1) then
-	-- 				BALLoadoutReminder.MAIN:checkAndShow()
-	-- 			else
-	-- 				LoadoutReminderFrame:Hide()
-	-- 			end
-	-- 		end
-
-	-- 		info.text = setName
-	-- 		info.arg1 = info.text
-	-- 		UIDropDownMenu_AddButton(info)
-	-- 	end
-	-- end)
-end
-
-function BALLoadoutReminder.MAIN:InitDropdownMenu(linkedSetID, label, offsetX, offsetY)
-	-- local dropDown = CreateFrame("Frame", "Dropdown" .. linkedSetID, self.optionsPanel, "UIDropDownMenuTemplate")
-	-- dropDown:SetPoint("TOP", self.optionsPanel, offsetX, offsetY)
-	-- UIDropDownMenu_SetWidth(dropDown, 200) -- Use in place of dropDown:SetWidth
-	-- -- Bind an initializer function to the dropdown; see previous sections for initializer function examples.
-	-- if LoadoutReminderDB[linkedSetID] ~= nil then
-	-- 	UIDropDownMenu_SetText(dropDown, LoadoutReminderDB[linkedSetID])
-	-- else
-	-- 	UIDropDownMenu_SetText(dropDown, "Choose an addon set")
-	-- end
-	
-	-- BALLoadoutReminder.MAIN:InitializeDropdownValues(dropDown, linkedSetID)
-
-	-- local dd_title = dropDown:CreateFontString('dd_title', 'OVERLAY', 'GameFontNormal')
-    -- dd_title:SetPoint("TOP", 0, 10)
-	-- dd_title:SetText(label)
 end
