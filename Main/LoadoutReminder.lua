@@ -18,8 +18,6 @@ BALLoadoutReminderDB = BALLoadoutReminderDB or {
 	BG = nil,
 	ARENA = nil,
 	CURRENT_SET = nil,
-	ADV_MODE = false,
-	BAL_LOADED_SET = nil
 }
 
 
@@ -79,17 +77,6 @@ function BALLoadoutReminder.MAIN:GetAddonSets()
 	return BetterAddonListDB.sets
 end
 
-function BALLoadoutReminder.MAIN:SetCurrentSet(loaded_set)
-	BALLoadoutReminderDB["CURRENT_SET"] = loaded_set
-end
-
-function BALLoadoutReminder.MAIN:IsSetLoaded(setName) 
-	if BALLoadoutReminderDB["CURRENT_SET"] == nil then
-		return false
-	end
-	return BALLoadoutReminderDB["CURRENT_SET"] == setName
-end
-
 function BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(set)
 	if set == nil then
 		print("ALOR: Addonset not assigned yet. Type /lor config to configure")
@@ -110,45 +97,44 @@ function BALLoadoutReminder.MAIN:CheckAndShow()
 	local ARENA_SET = BALLoadoutReminderDB["ARENA"]
 	local OPENWORLD_SET = BALLoadoutReminderDB["OPENWORLD"]
 	local SET_TO_LOAD = nil
+	local CURRENT_SET = BALLoadoutReminder.MAIN:GetCurrentSet()
 
 	-- check if player went into a dungeon
 	if inInstance and instanceType == 'party' then
 		if instanceType == 'party' then
-			if BALLoadoutReminder.MAIN:IsSetLoaded(DUNGEON_SET) or DUNGEON_SET == nil then
+			if DUNGEON_SET == CURRENT_SET or DUNGEON_SET == nil then
 				BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(DUNGEON_SET)
 				return
 			end
 			SET_TO_LOAD = DUNGEON_SET
 		elseif instanceType == 'raid' then
-			if BALLoadoutReminder.MAIN:IsSetLoaded(RAID_SET) or RAID_SET == nil then
+			if RAID_SET == CURRENT_SET or RAID_SET == nil then
 				BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(RAID_SET)
 				return
 			end
 			SET_TO_LOAD = RAID_SET
 		elseif instanceType == 'pvp' then
-			if BALLoadoutReminder.MAIN:IsSetLoaded(BG_SET) or BG_SET == nil then
+			if BG_SET == CURRENT_SET or BG_SET == nil then
 				BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(BG_SET)
 				return
 			end
 			SET_TO_LOAD = BG_SET
 		elseif instanceType == 'arena' then
-			if BALLoadoutReminder.MAIN:IsSetLoaded(ARENA_SET) or ARENA_SET == nil then
+			if ARENA_SET == CURRENT_SET or ARENA_SET == nil then
 				BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(ARENA_SET)
 				return
 			end
 			SET_TO_LOAD = ARENA_SET
 		end
 	elseif not inInstance then
-		if BALLoadoutReminder.MAIN:IsSetLoaded(OPENWORLD_SET) or OPENWORLD_SET == nil then
+		if OPENWORLD_SET == CURRENT_SET or OPENWORLD_SET == nil then
 			BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(OPENWORLD_SET)
 			return
 		end
 		SET_TO_LOAD = OPENWORLD_SET
 	end
 
-	local CURRENT_SET = BALLoadoutReminderDB["CURRENT_SET"]
-
-	local CURRENT_SETV2 = BALLoadoutReminder.MAIN:GetCurrentSet()
+	
 
 	if CURRENT_SET ~= nil then
 		reminderFrame.content.info:SetText("Current Addon Set: \"" .. CURRENT_SET .. "\"")
