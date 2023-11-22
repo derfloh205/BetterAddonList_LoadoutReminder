@@ -2,11 +2,11 @@ _, BALLoadoutReminder = ...
 
 BALLoadoutReminder.OPTIONS = {}
 function BALLoadoutReminder.OPTIONS:Init()
-    BALLoadoutReminder.OPTIONS.optionsPanel = CreateFrame("Frame", "LoadoutReminderOptionsPanel")
+    BALLoadoutReminder.OPTIONS.optionsPanel = CreateFrame("Frame", "AddonLoadoutReminderOptionsPanel")
 
 	BALLoadoutReminder.OPTIONS.optionsPanel:HookScript("OnShow", function(self)
 		end)
-        BALLoadoutReminder.OPTIONS.optionsPanel.name = "LoadoutReminder"
+        BALLoadoutReminder.OPTIONS.optionsPanel.name = "Loadout Reminder: Addons"
 	local title = BALLoadoutReminder.OPTIONS.optionsPanel:CreateFontString('optionsTitle', 'OVERLAY', 'GameFontNormal')
     title:SetPoint("TOP", 0, 0)
 	title:SetText("Addon Loadout Reminder Options")

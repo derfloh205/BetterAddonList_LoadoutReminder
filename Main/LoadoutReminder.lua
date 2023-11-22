@@ -9,6 +9,8 @@ BALLoadoutReminder.MAIN:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 BALLoadoutReminder.MAIN.FRAMES = {}
 
+BALLoadoutReminderGGUIConfig = BALLoadoutReminderGGUIConfig or {}
+
 BALLoadoutReminderDB = BALLoadoutReminderDB or {
 	DUNGEON = nil,
 	OPENWORLD = nil,
