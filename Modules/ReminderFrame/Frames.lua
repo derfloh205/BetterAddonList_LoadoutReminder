@@ -1,5 +1,4 @@
 _, BALLoadoutReminder = ...
-BALLoadoutReminder.REMINDER_FRAME = {}
 BALLoadoutReminder.REMINDER_FRAME.FRAMES = {}
 
 function BALLoadoutReminder.REMINDER_FRAME.FRAMES:Init()
@@ -29,7 +28,12 @@ function BALLoadoutReminder.REMINDER_FRAME.FRAMES:Init()
         frame.content.info = BALLoadoutReminder.GGUI.Text({
             parent=frame.content, anchorParent=frame.content, offsetX=0, offsetY=0,
             anchorA="CENTER", anchorB="CENTER",
-            text="Hello Azeroth",
+            text="",
+        })
+
+        frame.content.loadButton = BALLoadoutReminder.GGUI.Button({
+            parent=frame.content, anchorParent=frame.content, anchorA="BOTTOM", anchorB="BOTTOM",
+            label="Load Set", adjustWidth=true, macro=true, offsetY=20
         })
         
         frame:Hide()

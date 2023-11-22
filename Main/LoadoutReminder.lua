@@ -1,4 +1,4 @@
-AddonName, BALLoadoutReminder = ...
+BALLoadoutReminderAddonName, BALLoadoutReminder = ...
 
 BALLoadoutReminder.MAIN = CreateFrame("Frame", "BALLoadoutReminderAddon")
 BALLoadoutReminder.MAIN:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -20,14 +20,12 @@ BALLoadoutReminderDB = BALLoadoutReminderDB or {
 
 
 function BALLoadoutReminder.MAIN:ADDON_LOADED(addon_name)
-	if addon_name ~= AddonName then
+	if addon_name ~= BALLoadoutReminderAddonName then
 		return
 	end
 	if BetterAddonListDB == nil then
-		print("BAL not loaded yet")
 		return
 	end
-	print("LoadoutReminder Loaded")
 	BALLoadoutReminder.GGUI:SetConfigSavedVariable("BALLoadoutReminderGGUIConfig")
 
 	BALLoadoutReminder.OPTIONS:Init()
@@ -35,6 +33,10 @@ function BALLoadoutReminder.MAIN:ADDON_LOADED(addon_name)
 	-- show on start -> debug
 
 	BALLoadoutReminder.MAIN:InitBALHook()
+
+	-- restore frame position
+	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
+	reminderFrame:RestoreSavedConfig(UIParent)
 end
 
 BALDropdownHooked = false
@@ -53,10 +55,8 @@ function BALLoadoutReminder.MAIN:InitBALHook()
 			end)
 			DropDownList2Button5:HookScript("OnClick", function() 
 				local setName = DropDownList2Button1NormalText:GetText()
-				-- print("clicked save button, addon set: " .. setName)
 
 				_G['LibDialog-1.0_Button1']:HookScript("OnClick", function() 
-					-- print("clicked save on set: " .. setName)
 					-- well a saved set is also always the current set!
 					BALLoadoutReminder.MAIN:SetCurrentSet(setName)
 					-- if the reminder frame is currently visible, update it by calling check and Show again
@@ -88,9 +88,9 @@ end
 
 function BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(set)
 	if set == nil then
-		print("LOR: Addonset not assigned yet. Type /lor config to configure")
+		print("ALOR: Addonset not assigned yet. Type /lor config to configure")
 	else
-		print("LOR: Addonset already loaded: " .. set)
+		print("ALOR: Addonset already loaded: " .. set)
 	end
 	
 end
@@ -106,7 +106,7 @@ function BALLoadoutReminder.MAIN:CheckAndShow()
 	local ARENA_SET = BALLoadoutReminderDB["ARENA"]
 	local OPENWORLD_SET = BALLoadoutReminderDB["OPENWORLD"]
 	local SET_TO_LOAD = nil
-	print("LR: check and show")
+
 	-- check if player went into a dungeon
 	if inInstance and instanceType == 'party' then
 		if instanceType == 'party' then
@@ -144,68 +144,76 @@ function BALLoadoutReminder.MAIN:CheckAndShow()
 
 	local CURRENT_SET = BALLoadoutReminderDB["CURRENT_SET"]
 
+	local CURRENT_SETV2 = BALLoadoutReminder.MAIN:GetCurrentSet()
+
 	if CURRENT_SET ~= nil then
 		reminderFrame.content.info:SetText("Current Addon Set: \"" .. CURRENT_SET .. "\"")
 	else
-		reminderFrame.content.info:SetText("")
+		reminderFrame.content.info:SetText("Current Addon Set not recognized")
 	end
 
-	-- local macroTextLoad = "/addons load " .. SET_TO_LOAD .. "\n/script LoadoutReminderBALLoadoutReminder.MAIN:setCurrentSet('"..SET_TO_LOAD.."')\n/reload"
-	-- LoadSetButton:SetAttribute("macrotext", macroTextLoad)
-	-- LoadSetButton:SetText("Load '"..SET_TO_LOAD.."'")
-
-	-- if BALLoadoutReminderDB['ADV_MODE'] then
-
-	-- 	LoadoutReminderFrame:SetSize(300, 170)
-	-- 	LoadSetButton:SetPoint("CENTER",LoadoutReminderFrame, "CENTER", 0, 5)
-
-	-- 	local macroTextEnable = "/addons enable " .. SET_TO_LOAD .. "\n/script LoadoutReminderBALLoadoutReminder.MAIN:setCurrentSet('"..SET_TO_LOAD.."')\n/reload"
-	-- 	EnableSetButton:SetAttribute("macrotext", macroText)
-	-- 	EnableSetButton:SetText("Enable '"..SET_TO_LOAD.."'")
-	-- 	EnableSetButton:Show()
-
-	-- 	if CURRENT_SET ~= nil then
-	-- 		local macroTextDisable = "/addons disable " .. CURRENT_SET .. "\n/script LoadoutReminderBALLoadoutReminder.MAIN:setCurrentSet('"..SET_TO_LOAD.."')\n/reload"
-	-- 		DisableSetButton:SetAttribute("macrotext", macroText)
-	-- 		DisableSetButton:SetText("Disable '"..CURRENT_SET.."'")
-	-- 		DisableSetButton:Show()
-	-- 	else
-	-- 		DisableSetButton:SetAttribute("macrotext", "")
-	-- 		DisableSetButton:SetText("Disable current Set")
-	-- 		DisableSetButton:Show()
-	-- 	end
-		
-	-- 	DisableSetButton:SetEnabled(CURRENT_SET ~= nil)
-	-- else
-	-- 	EnableSetButton:Hide()
-	-- 	DisableSetButton:Hide()
-	-- 	LoadoutReminderFrame:SetSize(300, 100)
-
-	-- 	LoadSetButton:SetPoint("CENTER",LoadoutReminderFrame, "CENTER", 0, -20)
-	-- end 
+	BALLoadoutReminder.REMINDER_FRAME:UpdateLoadButtonMacro(SET_TO_LOAD)
 
 	reminderFrame:Show()
+end
+
+--- find out what set is currently activated by iterating the addonlist
+function BALLoadoutReminder.MAIN:GetCurrentSet()
+	local numAddons = C_AddOns.GetNumAddOns()
+	local character = UnitName("player")
+	local enabledAddons = {}
+
+	for addonIndex=1, numAddons do
+		local enabledState = C_AddOns.GetAddOnEnableState(addonIndex, character)
+		if enabledState > 0 then
+			local addonName = C_AddOns.GetAddOnInfo(addonIndex)
+			-- skip for BAL cause it does not include itself in the set lists
+			if addonName ~= 'BetterAddonList' then
+				-- as map for instant check 
+				enabledAddons[addonName] = true
+			end
+		end
+	end 
+	-- to be able to early return
+	local function matchesCurrentSet(addonList)
+		for _, addonName in pairs(addonList) do
+			--print("- addon: " .. addonName)
+			if enabledAddons[addonName] == nil then
+				-- cannot be this set
+				return false
+			end
+		end
+		return true
+	end
+
+	-- check against list of addon sets of BAL
+	-- early return when matching set is found
+	for set, addons in pairs(BetterAddonListDB.sets) do
+		if matchesCurrentSet(addons) then
+			return set
+		end
+	end
 end
 
 
 function BALLoadoutReminder.MAIN:PLAYER_ENTERING_WORLD(isLogIn, isReload)
 	
-	-- if player just logged in, dont suggest addon set loading
-	if isLogIn then
-		-- purge it on login if player changed set and logged out (for whatever reason)
-		BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
-		return
-	elseif isReload then
-		-- check if player changed set via BAL gui
-		if BALLoadoutReminderDB['BAL_LOADED_SET'] ~= nil then
-			-- print("Set was changed with bal to: " .. LoadoutReminderDB['BAL_LOADED_SET'])
-			BALLoadoutReminder.MAIN:SetCurrentSet(BALLoadoutReminderDB['BAL_LOADED_SET'])
-			BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
-		end
-	else
-		-- just purge it because BAL does it too
-		BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
-	end
+	-- -- if player just logged in, dont suggest addon set loading
+	-- if isLogIn then
+	-- 	-- purge it on login if player changed set and logged out (for whatever reason)
+	-- 	BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
+	-- 	return
+	-- elseif isReload then
+	-- 	-- check if player changed set via BAL gui
+	-- 	if BALLoadoutReminderDB['BAL_LOADED_SET'] ~= nil then
+	-- 		-- print("Set was changed with bal to: " .. LoadoutReminderDB['BAL_LOADED_SET'])
+	-- 		BALLoadoutReminder.MAIN:SetCurrentSet(BALLoadoutReminderDB['BAL_LOADED_SET'])
+	-- 		BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
+	-- 	end
+	-- else
+	-- 	-- just purge it because BAL does it too
+	-- 	BALLoadoutReminderDB['BAL_LOADED_SET'] = nil
+	-- end
 
 	BALLoadoutReminder.MAIN:CheckAndShow()
 end
@@ -215,9 +223,9 @@ function BALLoadoutReminder.MAIN:LoadDefaultDB()
 end
 
 function BALLoadoutReminder.MAIN:PLAYER_LOGIN()
-	SLASH_LOADOUTREMINDER1 = "/loadoutreminder"
-	SLASH_LOADOUTREMINDER1 = "/lor"
-	SlashCmdList["LOADOUTREMINDER"] = function(input)
+	SLASH_ADDONLOADOUTREMINDER1 = "/loadoutreminder"
+	SLASH_ADDONLOADOUTREMINDER2 = "/lor"
+	SlashCmdList["ADDONLOADOUTREMINDER"] = function(input)
 
 		input = SecureCmdOptionParse(input)
 		if not input then return end
@@ -242,46 +250,4 @@ function BALLoadoutReminder.MAIN:PLAYER_LOGIN()
 			print("/lor check -> if configured check current player situation")
 		end
 	end
-end
-
-
-function BALLoadoutReminder.MAIN:InitLoadoutReminderFrame()
-
-	-- LoadoutReminderFrame.title = LoadoutReminderFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-	-- LoadoutReminderFrame.title:SetPoint("CENTER", LoadoutReminderFrameTitleBG, "CENTER", 5, 0)
-	-- LoadoutReminderFrame.title:SetText("Loadout Reminder")
-
-  
-	-- LoadoutReminderFrame.ContentFrame = CreateFrame("Frame", nil, LoadoutReminderFrame)
-	-- LoadoutReminderFrame.ContentFrame:SetSize(300, 150)
-	-- LoadoutReminderFrame.ContentFrame:SetPoint("TOPLEFT", LoadoutReminderFrameDialogBG, "TOPLEFT", -3, 4)
-
-	-- LoadoutReminderFrame.ContentFrame.text = LoadoutReminderFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-	-- LoadoutReminderFrame.ContentFrame.text:SetPoint("TOP", LoadoutReminderFrameDialogBG, "TOP", 5, -15)
-
-	-- makeFrameMoveable()
-
-	-- local bLoad = CreateFrame("Button", "LoadSetButton", LoadoutReminderFrame, "SecureActionButtonTemplate,UIPanelButtonTemplate")
-	-- bLoad:RegisterForClicks("AnyUp", "AnyDown")
-	-- bLoad:SetSize(200 ,30)
-	-- bLoad:SetPoint("CENTER",LoadoutReminderFrame, "CENTER", 0, 5)	
-	-- bLoad:SetAttribute("type1", "macro")
-	-- bLoad:SetAttribute("macrotext", "")
-	-- bLoad:SetText("Load Addonset")
-
-	-- local bEnable = CreateFrame("Button", "EnableSetButton", LoadoutReminderFrame, "SecureActionButtonTemplate,UIPanelButtonTemplate")
-	-- bEnable:RegisterForClicks("AnyUp", "AnyDown")
-	-- bEnable:SetSize(200 ,30)
-	-- bEnable:SetPoint("CENTER",LoadoutReminderFrame, "CENTER", 0, -25)
-	-- bEnable:SetAttribute("type1", "macro")
-	-- bEnable:SetAttribute("macrotext", "")
-	-- bEnable:SetText("Enable Addonset")
-
-	-- local bDisable = CreateFrame("Button", "DisableSetButton", LoadoutReminderFrame, "SecureActionButtonTemplate,UIPanelButtonTemplate")
-	-- bDisable:RegisterForClicks("AnyUp", "AnyDown")
-	-- bDisable:SetSize(200 ,30)
-	-- bDisable:SetPoint("CENTER",LoadoutReminderFrame, "CENTER", 0, -55)
-	-- bDisable:SetAttribute("type1", "macro")
-	-- bDisable:SetAttribute("macrotext", "")
-	-- bDisable:SetText("Disable Addonset")
 end
