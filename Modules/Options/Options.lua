@@ -53,15 +53,10 @@ function BALLoadoutReminder.OPTIONS:Init()
     end)
 
     local function dropdownClickCallback(setID, setName)
-        local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.MAIN.FRAMES, BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
         BALLoadoutReminderDB[setID] = setName
         -- a new set was chosen for a new environment
-        -- check if it is not already loaded anyway, then close frame if open
-        if not BALLoadoutReminder.MAIN:IsSetLoaded(setName) then
-            BALLoadoutReminder.MAIN:CheckAndShow()
-        else
-            reminderFrame:Hide()
-        end
+        -- update visibility
+        BALLoadoutReminder.MAIN:CheckAndShow()
     end
 
     ---@type GGUI.Dropdown

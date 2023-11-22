@@ -78,12 +78,9 @@ function BALLoadoutReminder.MAIN:GetAddonSets()
 end
 
 function BALLoadoutReminder.MAIN:PrintAlreadyLoadedMessage(set)
-	if set == nil then
-		print("ALOR: Addonset not assigned yet. Type /lor config to configure")
-	else
-		print("ALOR: Addonset already loaded: " .. set)
-	end
-	
+	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.MAIN.FRAMES, BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
+	-- hide frame if its visible
+	reminderFrame:Hide()
 end
 
 function BALLoadoutReminder.MAIN:CheckAndShow()
