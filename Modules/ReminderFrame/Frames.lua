@@ -19,8 +19,9 @@ function BALLoadoutReminder.REMINDER_FRAME.FRAMES:Init()
         collapseable=true,
         closeable=true,
         moveable=true,
-        backdropOptions=BALLoadoutReminder.CONST.DEFAULT_BACKDROP_OPTIONS,
-        -- onCloseCallback=,
+        backdropOptions=BALLoadoutReminder.CONST.DEFAULT_BACKDROP_OPTIONS, 
+        frameConfigTable=BALLoadoutReminderGGUIConfig,
+        frameTable=BALLoadoutReminder.MAIN.FRAMES,
     })
 
     local function createContent(frame)

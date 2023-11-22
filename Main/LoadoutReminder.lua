@@ -7,6 +7,8 @@ BALLoadoutReminder.MAIN:RegisterEvent("PLAYER_LOGIN")
 BALLoadoutReminder.MAIN:RegisterEvent("PLAYER_LOGOUT")
 BALLoadoutReminder.MAIN:RegisterEvent("PLAYER_ENTERING_WORLD")
 
+BALLoadoutReminder.MAIN.FRAMES = {}
+
 BALLoadoutReminderDB = BALLoadoutReminderDB or {
 	DUNGEON = nil,
 	OPENWORLD = nil,
@@ -26,7 +28,7 @@ function BALLoadoutReminder.MAIN:ADDON_LOADED(addon_name)
 	if BetterAddonListDB == nil then
 		return
 	end
-	BALLoadoutReminder.GGUI:SetConfigSavedVariable("BALLoadoutReminderGGUIConfig")
+	--BALLoadoutReminder.GGUI:SetConfigSavedVariable("BALLoadoutReminderGGUIConfig")
 
 	BALLoadoutReminder.OPTIONS:Init()
 	BALLoadoutReminder.REMINDER_FRAME.FRAMES:Init()	
@@ -35,14 +37,14 @@ function BALLoadoutReminder.MAIN:ADDON_LOADED(addon_name)
 	BALLoadoutReminder.MAIN:InitBALHook()
 
 	-- restore frame position
-	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
+	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.MAIN.FRAMES, BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
 	reminderFrame:RestoreSavedConfig(UIParent)
 end
 
 BALDropdownHooked = false
 function BALLoadoutReminder.MAIN:InitBALHook()
 	-- CASE: if player manipulates addon sets via addon list gui of BAL
-	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
+	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.MAIN.FRAMES, BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
 	BetterAddonListSetsButton:HookScript("OnClick", function() 
 		if not BALDropdownHooked then
 			DropDownList2Button4:HookScript("OnClick", function() 
@@ -98,7 +100,7 @@ end
 function BALLoadoutReminder.MAIN:CheckAndShow()
 	local inInstance, instanceType = IsInInstance()
 
-	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
+	local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.MAIN.FRAMES, BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
 
 	local DUNGEON_SET = BALLoadoutReminderDB["DUNGEON"]
 	local RAID_SET = BALLoadoutReminderDB["RAID"]

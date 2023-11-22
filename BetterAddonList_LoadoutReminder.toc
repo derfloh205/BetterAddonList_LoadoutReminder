@@ -9,7 +9,7 @@
 ## X-WoWI-ID: 26649
 ## RequiredDeps: BetterAddonList
 ## SavedVariables: BALLoadoutReminderOptions, BALLoadoutReminderDB, BALLoadoutReminderGGUIConfig
-## Version: 2.0.0
+## Version: 2.0.1
 
 embeds.xml
 Libs/Libs.lua

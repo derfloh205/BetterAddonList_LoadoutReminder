@@ -3,7 +3,7 @@ _, BALLoadoutReminder = ...
 BALLoadoutReminder.REMINDER_FRAME = {}
 
 function BALLoadoutReminder.REMINDER_FRAME:UpdateLoadButtonMacro(SET_TO_LOAD)
-    local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
+    local reminderFrame = BALLoadoutReminder.GGUI:GetFrame(BALLoadoutReminder.MAIN.FRAMES, BALLoadoutReminder.CONST.FRAMES.REMINDER_FRAME)
     local macroText = "/addons load " .. SET_TO_LOAD .. "\n/reload"
 
     ---@type GGUI.Button
